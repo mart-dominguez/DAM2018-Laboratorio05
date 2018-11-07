@@ -136,7 +136,7 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
     }
 
     // AGREGAR en MapaFragment una interface OnMapaListener con el método coordenadasSeleccionadas
-    // IMPLEMENTAR dic ho método en esta actividad.
+    // IMPLEMENTAR dicho método en esta actividad.
     // el objetivo de este método, es simplmente invocar al fragmento "nuevoReclamoFragment"
     // pasando como argumento el objeto "LatLng" elegido por el usuario en el click largo
     // como ubicación del reclamo

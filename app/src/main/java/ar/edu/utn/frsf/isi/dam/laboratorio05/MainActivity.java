@@ -65,6 +65,16 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
                                 //TODO si "fragment" es null entonces crear el fragmento mapa, agregar un bundel con el parametro tipo_mapa
                                 // configurar a la actividad como listener de los eventos del mapa ((MapaFragment) fragment).setListener(this);
                                // fragmentTransaction = true;
+
+                                tag="mapaReclamos";
+                                fragment =  getSupportFragmentManager().findFragmentByTag(tag);
+                                if(fragment==null) fragment = new MapaFragment();
+                                Bundle bundle = new Bundle();
+                                bundle.putInt("tipo_mapa", 1);
+                                fragment.setArguments(bundle);
+
+                                fragmentTransaction = true;
+
                                 break;
                             case R.id.optHeatMap:
                                 //TODO HABILITAR
@@ -73,6 +83,16 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
                                 //TODO si "fragment" es null entonces crear el fragmento mapa, agregar un bundel con el parametro tipo_mapa
                                 // configurar a la actividad como listener de los eventos del mapa ((MapaFragment) fragment).setListener(this);
                                // fragmentTransaction = true;
+
+                                tag="mapaReclamos";
+                                fragment =  getSupportFragmentManager().findFragmentByTag(tag);
+                                if(fragment==null) fragment = new MapaFragment();
+                                Bundle bundle2 = new Bundle();
+                                bundle2.putInt("tipo_mapa", 2);
+                                fragment.setArguments(bundle2);
+
+                                fragmentTransaction = true;
+
                                 break;
                         }
 
@@ -116,7 +136,7 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
     }
 
     // AGREGAR en MapaFragment una interface OnMapaListener con el método coordenadasSeleccionadas
-    // IMPLEMENTAR dicho método en esta actividad.
+    // IMPLEMENTAR dic ho método en esta actividad.
     // el objetivo de este método, es simplmente invocar al fragmento "nuevoReclamoFragment"
     // pasando como argumento el objeto "LatLng" elegido por el usuario en el click largo
     // como ubicación del reclamo

@@ -1,7 +1,10 @@
 package ar.edu.utn.frsf.isi.dam.laboratorio05;
 
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,6 +35,29 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
     @Override
     public void onMapReady(GoogleMap map) {
         miMapa = map;
+        actualizarMapa();
+    }
+
+    private void actualizarMapa() {
+        if (ActivityCompat.checkSelfPermission(getContext(),Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions((MainActivity)listener,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    9999);
+            return;
+        }
+        miMapa.setMyLocationEnabled(true);
+    }
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case 9999: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    actualizarMapa();
+                } else { // }
+                    return;
+                }
+            }
+        }
     }
 
     public void setListener(OnAbrirMapaListener listener) {

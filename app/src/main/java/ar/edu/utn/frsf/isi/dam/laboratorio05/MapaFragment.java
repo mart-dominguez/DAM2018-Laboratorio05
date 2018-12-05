@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -35,6 +36,12 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
     @Override
     public void onMapReady(GoogleMap map) {
         miMapa = map;
+        miMapa.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+            @Override
+            public void onMapLongClick(LatLng latLng){
+                listener.coordenadasSeleccionadas(latLng);
+            }
+        });
         actualizarMapa();
     }
 
@@ -66,5 +73,8 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
 
     public interface OnAbrirMapaListener {
         public void obtenerCoordenadas();
+        public void coordenadasSeleccionadas(LatLng c);
     }
+
+
 }

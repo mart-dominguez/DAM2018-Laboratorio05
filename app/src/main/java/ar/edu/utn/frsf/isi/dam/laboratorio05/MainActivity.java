@@ -8,6 +8,8 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
+import com.google.android.gms.maps.model.LatLng;
+
 
 // AGREGAR en MapaFragment una interface MapaFragment.OnMapaListener con el método coordenadasSeleccionadas 
 // IMPLEMENTAR dicho método en esta actividad.
@@ -143,13 +145,41 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
     };
 */
 
-
         @Override
         public void obtenerCoordenadas() {
-            // TODO: invocar el fragmento del mapa
-            // pasando como parametro un bundle con "tipo_mapa"
+            // TODO: invocar el fragmento del mapa;
+            Fragment fragment = null;
+            String tag="mapaReclamos";
+            fragment = getSupportFragmentManager().findFragmentByTag(tag);
+            if (fragment == null){
+                Bundle bundle = new Bundle();
+                bundle.putInt("tipo_mapa", 1);
+                fragment = new MapaFragment();
+                fragment.setArguments(bundle);
+            }
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .add(R.id.contenido, fragment)
+                    .commit();
+            ((MapaFragment)fragment).setListener(MainActivity.this);
             // para que el usuario vea el mapa y con el click largo pueda acceder
             // a seleccionar la coordenada donde se registra el reclamo
             // configurar a la actividad como listener de los eventos del mapa ((MapaFragment) fragment).setListener(this);
         }
+
+        @Override
+        public void coordenadasSeleccionadas(LatLng c) {
+            String tag = "nuevoReclamoFragment";
+            Fragment fragment =  getSupportFragmentManager().findFragmentByTag(tag);
+            if(fragment==null) {
+                fragment = new NuevoReclamoFragment();
+                ((NuevoReclamoFragment) fragment).setListener(MainActivity.this);
+            }
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.contenido, fragment)
+                    .commit();
+            ((NuevoReclamoFragment) fragment).actualizarCoordenadas(c);
+        }
+
 }

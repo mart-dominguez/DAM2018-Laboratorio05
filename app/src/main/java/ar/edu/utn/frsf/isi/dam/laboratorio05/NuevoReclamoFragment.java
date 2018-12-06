@@ -14,6 +14,8 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import ar.edu.utn.frsf.isi.dam.laboratorio05.modelo.MyDatabase;
 import ar.edu.utn.frsf.isi.dam.laboratorio05.modelo.Reclamo;
 import ar.edu.utn.frsf.isi.dam.laboratorio05.modelo.ReclamoDao;
@@ -158,6 +160,8 @@ public class NuevoReclamoFragment extends Fragment {
         Thread t1 = new Thread(hiloActualizacion);
         t1.start();
     }
-
+    public void actualizarCoordenadas(LatLng latLng){
+        this.tvCoord.setText(latLng.latitude+", "+latLng.longitude);
+    }
 
 }

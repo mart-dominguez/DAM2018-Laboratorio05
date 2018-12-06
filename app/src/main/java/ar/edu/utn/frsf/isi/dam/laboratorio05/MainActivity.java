@@ -1,7 +1,13 @@
 package ar.edu.utn.frsf.isi.dam.laboratorio05;
 
+import android.Manifest;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
@@ -9,6 +15,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
 import com.google.android.gms.maps.model.LatLng;
+
+import java.text.DecimalFormat;
 
 
 // AGREGAR en MapaFragment una interface MapaFragment.OnMapaListener con el método coordenadasSeleccionadas 
@@ -119,32 +127,6 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
         getSupportActionBar().setDisplayHomeAsUpEnabled(canback);
     }
 
-    // AGREGAR en MapaFragment una interface OnMapaListener con el método coordenadasSeleccionadas
-    // IMPLEMENTAR dicho método en esta actividad.
-    // el objetivo de este método, es simplmente invocar al fragmento "nuevoReclamoFragment"
-    // pasando como argumento el objeto "LatLng" elegido por el usuario en el click largo
-    // como ubicación del reclamo
-
-/*        @Override
-        public void coordenadasSeleccionadas(LatLng c) {
-            String tag = "nuevoReclamoFragment";
-            Fragment fragment =  getSupportFragmentManager().findFragmentByTag(tag);
-            if(fragment==null) {
-                fragment = new NuevoReclamoFragment();
-                ((NuevoReclamoFragment) fragment).setListener(listenerReclamo);
-            }
-            Bundle bundle = new Bundle();
-            bundle.putString("latLng",c.latitude+";"+c.longitude);
-            fragment.setArguments(bundle);
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.contenido, fragment,tag)
-                    .commit();
-
-        }
-    };
-*/
-
         @Override
         public void obtenerCoordenadas() {
             // TODO: invocar el fragmento del mapa;
@@ -159,7 +141,8 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
             }
             getSupportFragmentManager()
                     .beginTransaction()
-                    .add(R.id.contenido, fragment)
+                    .replace(R.id.contenido, fragment)
+                    .addToBackStack(null)
                     .commit();
             ((MapaFragment)fragment).setListener(MainActivity.this);
             // para que el usuario vea el mapa y con el click largo pueda acceder
@@ -175,11 +158,16 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
                 fragment = new NuevoReclamoFragment();
                 ((NuevoReclamoFragment) fragment).setListener(MainActivity.this);
             }
+            Bundle bundle = new Bundle();
+            DecimalFormat numberFormat = new DecimalFormat("#.000");
+            bundle.putString("latLng",numberFormat.format(c.latitude)+";"+numberFormat.format(c.longitude));
+            fragment.setArguments(bundle);
             getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.contenido, fragment)
+                    .replace(R.id.contenido, fragment,tag)
+                    .addToBackStack(null)
                     .commit();
-            ((NuevoReclamoFragment) fragment).actualizarCoordenadas(c);
+
         }
 
 }

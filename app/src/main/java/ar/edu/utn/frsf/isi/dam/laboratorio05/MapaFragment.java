@@ -17,7 +17,16 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.util.List;
+
+import ar.edu.utn.frsf.isi.dam.laboratorio05.modelo.MyDatabase;
+import ar.edu.utn.frsf.isi.dam.laboratorio05.modelo.Reclamo;
 
 import static android.support.v4.content.ContextCompat.getSystemService;
 
@@ -27,7 +36,15 @@ import static android.support.v4.content.ContextCompat.getSystemService;
 public class MapaFragment extends SupportMapFragment implements OnMapReadyCallback {
     private GoogleMap miMapa;
     private OnAbrirMapaListener listener;
-    public MapaFragment() { }
+    List<Reclamo> reclamos;
+    private boolean mostrarCosas = false;
+
+
+    public MapaFragment() {
+
+    }
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = super.onCreateView(inflater, container, savedInstanceState);
@@ -37,8 +54,45 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
             tipoMapa = argumentos .getInt("tipo_mapa",0);
         }
         getMapAsync(this);
+        if(tipoMapa == 2){
+            System.out.println("Detecté bien el mapa");
+            Runnable r = new Runnable() {
+                @Override
+                public void run() {
+                    MapaFragment.this.reclamos = MyDatabase.getInstance(getActivity()).getReclamoDao().getAll();
+                }
+            };
+        Thread t = new Thread(r);
+        t.start();
+        mostrarCosas = true;
+        }
         return rootView;
     }
+
+    public void agregarMarcadorColor(Reclamo r){
+        System.out.println("QUISE AGREGAR");
+        if(miMapa!=null) {
+            System.out.println("AGREGO");
+            LatLng l = new LatLng(r.getLatitud(), r.getLongitud());
+            BitmapDescriptor b;
+            switch(Reclamo.TipoReclamo.valueOf(r.getTipo().name()).ordinal()){
+                case 0: b = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE); break;
+                case 1: b = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE); break;
+                case 2: b = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE); break;
+                case 3: b = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED); break;
+                case 4: b = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN); break;
+                case 5: b = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ROSE); break;
+                default: b = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW); break;
+            }
+            miMapa.addMarker(
+                    new MarkerOptions()
+                            .position(l)
+                            .title(r.getReclamo())
+                            .icon(b)
+            );
+        }
+    }
+
     @Override
     public void onMapReady(GoogleMap map) {
         miMapa = map;
@@ -49,6 +103,36 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
             }
         });
         actualizarMapa();
+        if(mostrarCosas){
+            for(Reclamo rec : reclamos){
+                this.agregarMarcadorColor(rec);
+            }
+            if(reclamos.size()>0) {
+                LatLngBounds b = obtenerBounds();
+                miMapa.moveCamera(CameraUpdateFactory.newLatLngBounds(b, 100));
+            }
+            mostrarCosas = false;
+        }
+    }
+
+    private LatLngBounds obtenerBounds() {
+        Double minlat = reclamos.get(0).getLatitud();
+        Double maxlat = reclamos.get(0).getLatitud();
+        Double minlong = reclamos.get(0).getLongitud();
+        Double maxlong = reclamos.get(0).getLongitud();
+        for(Reclamo rec : reclamos) {
+            if (rec.getLatitud() > maxlat) {
+                maxlat = rec.getLatitud();
+            } else if (rec.getLatitud() < minlat) {
+                minlat = rec.getLatitud();
+            } else if (rec.getLongitud() > maxlong) {
+                maxlong = rec.getLongitud();
+            } else if (rec.getLongitud() < minlong) {
+                minlong = rec.getLongitud();
+            }
+        }
+        LatLngBounds bound =  new LatLngBounds(new LatLng(minlat,minlong),new LatLng(maxlat,maxlong));
+        return bound;
     }
 
     private void actualizarMapa() {
@@ -61,6 +145,7 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
         }
         miMapa.setMyLocationEnabled(true);
     }
+
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
             case 9999: {
@@ -81,6 +166,5 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
         public void obtenerCoordenadas();
         public void coordenadasSeleccionadas(LatLng c);
     }
-
 
 }

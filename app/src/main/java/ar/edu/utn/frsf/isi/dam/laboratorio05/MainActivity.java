@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
                                 fragment = getSupportFragmentManager().findFragmentByTag(tag);
                                 if (fragment == null){
                                     Bundle bundle = new Bundle();
-                                    bundle.putInt("tipo_mapa", 1);
+                                    bundle.putInt("tipo_mapa", 2);
                                     fragment = new MapaFragment();
                                     fragment.setArguments(bundle);
                                 }
@@ -129,7 +129,6 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 
         @Override
         public void obtenerCoordenadas() {
-            // TODO: invocar el fragmento del mapa;
             Fragment fragment = null;
             String tag="mapaReclamos";
             fragment = getSupportFragmentManager().findFragmentByTag(tag);

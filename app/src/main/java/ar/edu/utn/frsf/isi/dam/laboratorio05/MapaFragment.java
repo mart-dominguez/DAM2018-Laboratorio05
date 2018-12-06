@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -109,29 +110,20 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
             }
             if(reclamos.size()>0) {
                 LatLngBounds b = obtenerBounds();
-                miMapa.moveCamera(CameraUpdateFactory.newLatLngBounds(b, 100));
+                CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(b, 200,200,5);
+                miMapa.animateCamera(cu);
             }
             mostrarCosas = false;
         }
     }
 
     private LatLngBounds obtenerBounds() {
-        Double minlat = reclamos.get(0).getLatitud();
-        Double maxlat = reclamos.get(0).getLatitud();
-        Double minlong = reclamos.get(0).getLongitud();
-        Double maxlong = reclamos.get(0).getLongitud();
-        for(Reclamo rec : reclamos) {
-            if (rec.getLatitud() > maxlat) {
-                maxlat = rec.getLatitud();
-            } else if (rec.getLatitud() < minlat) {
-                minlat = rec.getLatitud();
-            } else if (rec.getLongitud() > maxlong) {
-                maxlong = rec.getLongitud();
-            } else if (rec.getLongitud() < minlong) {
-                minlong = rec.getLongitud();
-            }
+
+        LatLngBounds.Builder b = new LatLngBounds.Builder();
+        for (Reclamo r : reclamos) {
+            b.include(new LatLng(r.getLatitud(), r.getLongitud()));
         }
-        LatLngBounds bound =  new LatLngBounds(new LatLng(minlat,minlong),new LatLng(maxlat,maxlong));
+        LatLngBounds bound = b.build();
         return bound;
     }
 

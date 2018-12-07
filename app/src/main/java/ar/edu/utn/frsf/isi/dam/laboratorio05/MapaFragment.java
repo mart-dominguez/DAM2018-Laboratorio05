@@ -158,6 +158,7 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
                     CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(b, 200,200,5);
                     miMapa.animateCamera(cu);
                 }
+                id_tipo = -1;
             }else if(id_reclamo<0){
                 for(Reclamo rec : reclamos){
                     this.agregarMarcadorColor(rec);

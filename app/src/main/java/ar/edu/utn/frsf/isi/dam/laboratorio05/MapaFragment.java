@@ -4,6 +4,7 @@ package ar.edu.utn.frsf.isi.dam.laboratorio05;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -20,6 +21,8 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -39,7 +42,7 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
     private OnAbrirMapaListener listener;
     List<Reclamo> reclamos;
     private boolean mostrarCosas = false;
-
+    long id_reclamo = -1;
 
     public MapaFragment() {
 
@@ -56,7 +59,6 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
         }
         getMapAsync(this);
         if(tipoMapa == 2){
-            System.out.println("Detecté bien el mapa");
             Runnable r = new Runnable() {
                 @Override
                 public void run() {
@@ -66,6 +68,17 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
         Thread t = new Thread(r);
         t.start();
         mostrarCosas = true;
+        }else if (tipoMapa == 3){
+            mostrarCosas = true;
+            id_reclamo = argumentos.getInt("id_reclamo",-1);
+            Runnable r = new Runnable() {
+                @Override
+                public void run() {
+                    MapaFragment.this.reclamos = MyDatabase.getInstance(getActivity()).getReclamoDao().getAll();
+                }
+            };
+            Thread t = new Thread(r);
+            t.start();
         }
         return rootView;
     }
@@ -105,13 +118,38 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
         });
         actualizarMapa();
         if(mostrarCosas){
-            for(Reclamo rec : reclamos){
-                this.agregarMarcadorColor(rec);
-            }
-            if(reclamos.size()>0) {
-                LatLngBounds b = obtenerBounds();
-                CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(b, 200,200,5);
-                miMapa.animateCamera(cu);
+            if(id_reclamo<0){
+                for(Reclamo rec : reclamos){
+                    this.agregarMarcadorColor(rec);
+                }
+                if(reclamos.size()>0) {
+                    LatLngBounds b = obtenerBounds();
+                    CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(b, 200,200,5);
+                    miMapa.animateCamera(cu);
+                }
+            }else{
+                Reclamo reclamo = null;
+                for(Reclamo r: reclamos){
+                    if (r.getId() == id_reclamo){
+                        reclamo = r;
+                    }
+                }
+                if(reclamo != null){
+                    this.agregarMarcadorColor(reclamo);
+                    CircleOptions circleOptions = new CircleOptions()
+                            .center(new LatLng(reclamo.getLatitud(),reclamo.getLongitud()))
+                            .radius(500)
+                            .strokeColor(Color.RED)
+                            .strokeWidth(5);
+                    Circle circle = miMapa.addCircle(circleOptions);
+                    LatLng l = new LatLng(reclamo.getLatitud(), reclamo.getLongitud());
+                    miMapa.moveCamera(CameraUpdateFactory.newLatLngZoom(l, 15));
+                }else{
+                    System.out.println("No se encontró el reclamo");
+                }
+
+
+                id_reclamo= -1;
             }
             mostrarCosas = false;
         }

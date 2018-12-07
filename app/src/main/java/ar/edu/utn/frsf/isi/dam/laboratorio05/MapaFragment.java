@@ -26,6 +26,8 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.maps.android.heatmaps.HeatmapTileProvider;
@@ -47,6 +49,7 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
     List<Reclamo> reclamos;
     private boolean mostrarCosas = false;
     long id_reclamo = -1;
+    int id_tipo = -1;
 
     public MapaFragment() {
 
@@ -72,6 +75,10 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
         }else if (tipoMapa == 4){
             traerReclamos();
             id_reclamo = 100;
+            mostrarCosas = true;
+        }else if (tipoMapa == 5){
+            traerReclamos();
+            id_tipo = argumentos.getInt("id_tipo",-1);
             mostrarCosas = true;
         }
         return rootView;
@@ -133,7 +140,25 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
         });
         actualizarMapa();
         if(mostrarCosas){
-            if(id_reclamo<0){
+            if(id_tipo>=0){
+                List<LatLng> lista = new ArrayList<>();
+                for(Reclamo rec : reclamos) {
+                    if (Reclamo.TipoReclamo.valueOf(rec.getTipo().name()).ordinal() == id_tipo) {
+                        this.agregarMarcadorColor(rec);
+                        lista.add(new LatLng(rec.getLatitud(), rec.getLongitud()));
+                    }
+                }
+                PolylineOptions rectOptions = new PolylineOptions();
+                for(LatLng l: lista) {
+                    rectOptions.add(l).color(Color.RED);
+                }
+                Polyline polyline = miMapa.addPolyline(rectOptions);
+                if(lista.size()>0) {
+                    LatLngBounds b = obtenerBounds();
+                    CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(b, 200,200,5);
+                    miMapa.animateCamera(cu);
+                }
+            }else if(id_reclamo<0){
                 for(Reclamo rec : reclamos){
                     this.agregarMarcadorColor(rec);
                 }

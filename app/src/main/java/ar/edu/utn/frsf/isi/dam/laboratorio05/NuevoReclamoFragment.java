@@ -24,6 +24,7 @@ public class NuevoReclamoFragment extends Fragment {
 
     public interface OnNuevoLugarListener {
         public void obtenerCoordenadas();
+        public void mapaPorTipos(int pos);
     }
 
     public void setListener(OnNuevoLugarListener listener) {

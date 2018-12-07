@@ -90,6 +90,15 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
                                 ((MapaFragment)fragment).setListener(MainActivity.this);
                                 fragmentTransaction = true;
                                 break;
+                            case R.id.optBuscar:
+                                tag="BuscarReclamos";
+                                fragment =  getSupportFragmentManager().findFragmentByTag(tag);
+                                if (fragment == null){
+                                    fragment = new BuscarFragment();
+                                }
+                                ((BuscarFragment)fragment).setListener(MainActivity.this);
+                                fragmentTransaction = true;
+                                break;
                         }
 
                         if(fragmentTransaction) {
@@ -144,7 +153,7 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
             }
             getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.contenido, fragment)
+                    .replace(R.id.contenido, fragment, tag)
                     .addToBackStack(null)
                     .commit();
             ((MapaFragment)fragment).setListener(MainActivity.this);
@@ -172,5 +181,25 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
                     .commit();
 
         }
+
+        public void mapaPorTipos(int pos){
+
+            String tag="mapaReclamos";
+            Fragment fragment =  getSupportFragmentManager().findFragmentByTag(tag);
+            if (fragment == null){
+                Bundle bundle = new Bundle();
+                bundle.putInt("tipo_mapa", 5);
+                bundle.putInt("id_tipo", pos);
+                fragment = new MapaFragment();
+                fragment.setArguments(bundle);
+            }
+            ((MapaFragment)fragment).setListener(MainActivity.this);
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.contenido, fragment,tag)
+                        .addToBackStack(null)
+                        .commit();
+                getSupportActionBar().setTitle("Mapa por tipos");
+    }
 
 }

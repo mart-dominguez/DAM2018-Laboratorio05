@@ -26,7 +26,11 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.TileOverlay;
+import com.google.android.gms.maps.model.TileOverlayOptions;
+import com.google.maps.android.heatmaps.HeatmapTileProvider;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import ar.edu.utn.frsf.isi.dam.laboratorio05.modelo.MyDatabase;
@@ -59,28 +63,39 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
         }
         getMapAsync(this);
         if(tipoMapa == 2){
-            Runnable r = new Runnable() {
-                @Override
-                public void run() {
-                    MapaFragment.this.reclamos = MyDatabase.getInstance(getActivity()).getReclamoDao().getAll();
-                }
-            };
-        Thread t = new Thread(r);
-        t.start();
-        mostrarCosas = true;
+            traerReclamos();
+            mostrarCosas = true;
         }else if (tipoMapa == 3){
+            traerReclamos();
             mostrarCosas = true;
             id_reclamo = argumentos.getInt("id_reclamo",-1);
-            Runnable r = new Runnable() {
-                @Override
-                public void run() {
-                    MapaFragment.this.reclamos = MyDatabase.getInstance(getActivity()).getReclamoDao().getAll();
-                }
-            };
-            Thread t = new Thread(r);
-            t.start();
+        }else if (tipoMapa == 4){
+            traerReclamos();
+            id_reclamo = 100;
+            mostrarCosas = true;
         }
         return rootView;
+    }
+
+    private void traerReclamos(){
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                MapaFragment.this.reclamos = MyDatabase.getInstance(getActivity()).getReclamoDao().getAll();
+            }
+        };
+        Thread t = new Thread(r);
+        t.start();
+    }
+
+    private void addHeatMap() {
+        List<LatLng> list = new ArrayList<>();
+        for(Reclamo r: reclamos){
+            list.add(new LatLng(r.getLatitud(), r.getLongitud()));
+        }
+        HeatmapTileProvider mProvider = new HeatmapTileProvider.Builder().data(list)
+                .build();
+        TileOverlay mOverlay = miMapa.addTileOverlay(new TileOverlayOptions().tileProvider(mProvider));
     }
 
     public void agregarMarcadorColor(Reclamo r){
@@ -127,6 +142,14 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
                     CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(b, 200,200,5);
                     miMapa.animateCamera(cu);
                 }
+            }else if (id_reclamo == 100) {
+                if(reclamos.size()>0) {
+                    addHeatMap();
+                    LatLngBounds b = obtenerBounds();
+                    CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(b, 200,200,5);
+                    miMapa.animateCamera(cu);
+                }
+
             }else{
                 Reclamo reclamo = null;
                 for(Reclamo r: reclamos){
@@ -147,8 +170,6 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
                 }else{
                     System.out.println("No se encontró el reclamo");
                 }
-
-
                 id_reclamo= -1;
             }
             mostrarCosas = false;

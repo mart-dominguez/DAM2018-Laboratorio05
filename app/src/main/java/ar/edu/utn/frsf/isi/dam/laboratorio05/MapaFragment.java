@@ -132,12 +132,6 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
     @Override
     public void onMapReady(GoogleMap map) {
         miMapa = map;
-        miMapa.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
-            @Override
-            public void onMapLongClick(LatLng latLng){
-                listener.coordenadasSeleccionadas(latLng);
-            }
-        });
         actualizarMapa();
         if(mostrarCosas){
             if(id_tipo>=0){
@@ -199,6 +193,13 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
                 id_reclamo= -1;
             }
             mostrarCosas = false;
+        }else{
+            miMapa.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+                @Override
+                public void onMapLongClick(LatLng latLng){
+                    listener.coordenadasSeleccionadas(latLng);
+                }
+            });
         }
     }
 

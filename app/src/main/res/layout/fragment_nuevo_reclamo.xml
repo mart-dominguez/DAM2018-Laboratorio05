@@ -57,7 +57,7 @@
 
         <ImageView
             android:id="@+id/ivFoto"
-            android:layout_width="350dp"
+            android:layout_width="227dp"
             android:layout_height="140dp"
             android:layout_weight="1"
             android:src="@color/common_google_signin_btn_text_dark_default" />
@@ -66,11 +66,48 @@
             android:id="@+id/btnSacarFoto"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="45dp"
+            android:layout_marginTop="45dp"
             android:layout_weight="1"
             android:enabled="false"
-            android:layout_marginTop="45dp"
-            android:layout_marginBottom="45dp"
             android:text="Agregar foto" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Grabacion de sonido" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnGrabar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:enabled="false"
+            android:text="Grabar" />
+
+        <Button
+            android:id="@+id/btnDetener"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:enabled="false"
+            android:text="Detener" />
+
+        <Button
+            android:id="@+id/btnReproducir"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:enabled="false"
+            android:text="Reproducir" />
     </LinearLayout>
 
     <Button
@@ -78,4 +115,5 @@
         android:text="Guardar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+
 </LinearLayout>

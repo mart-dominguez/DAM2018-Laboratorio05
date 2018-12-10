@@ -208,15 +208,19 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
                 getSupportActionBar().setTitle("Mapa por tipos");
     }
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        System.out.println("rq :" + requestCode);
         switch (requestCode) {
             case 1:
-                System.out.println("ENTREEEEEEEEEEEEEEE");
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     String tag = "nuevoReclamoFragment";
                     NuevoReclamoFragment f =  (NuevoReclamoFragment)getSupportFragmentManager().findFragmentByTag(tag);
                     f.sacarFoto();
-                }
+                }break;
+            case 2:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    String tag = "nuevoReclamoFragment";
+                    NuevoReclamoFragment f =  (NuevoReclamoFragment)getSupportFragmentManager().findFragmentByTag(tag);
+                    f.grabarAudio();
+                }break;
         }
     }
 

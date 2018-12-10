@@ -71,6 +71,7 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
                                     fragment.setArguments(bundle);
                                 }
                                 ((MapaFragment)fragment).setListener(MainActivity.this);
+
                                 fragmentTransaction = true;
                                 break;
 

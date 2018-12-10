@@ -6,6 +6,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.media.MediaPlayer;
+import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -17,6 +19,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -55,6 +58,7 @@ public class NuevoReclamoFragment extends Fragment {
         this.listener = listener;
     }
 
+    private String pathFotoVieja,pathAudioViejo;
     private Reclamo reclamoActual;
     private ReclamoDao reclamoDao;
     private ImageView ivFoto;
@@ -65,6 +69,13 @@ public class NuevoReclamoFragment extends Fragment {
     private TextView tvCoord;
     private Button buscarCoord;
     private Button btnGuardar;
+    private Button btnGrabar;
+    private Button btnDetener;
+    private Button btnReproducir;
+    private MediaRecorder mRecorder = null;
+    private MediaPlayer mPlayer = null;
+    private boolean reproduciendo = false;
+
     private OnNuevoLugarListener listener;
 
     private ArrayAdapter<Reclamo.TipoReclamo> tipoReclamoAdapter;
@@ -89,6 +100,9 @@ public class NuevoReclamoFragment extends Fragment {
         btnGuardar = (Button) v.findViewById(R.id.btnGuardar);
         btnSacarFoto = (Button) v.findViewById(R.id.btnSacarFoto);
         ivFoto = (ImageView) v.findViewById(R.id.ivFoto);
+        btnGrabar = (Button) v.findViewById(R.id.btnGrabar);
+        btnDetener = (Button) v.findViewById(R.id.btnDetener);
+        btnReproducir = (Button) v.findViewById(R.id.btnReproducir);
 
         tipoReclamoAdapter = new ArrayAdapter<Reclamo.TipoReclamo>(getActivity(), android.R.layout.simple_spinner_item, Reclamo.TipoReclamo.values());
         tipoReclamoAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -108,6 +122,7 @@ public class NuevoReclamoFragment extends Fragment {
         tipoReclamo.setEnabled(edicionActivada);
         btnGuardar.setEnabled(edicionActivada);
         btnSacarFoto.setEnabled(edicionActivada);
+        btnGrabar.setEnabled(edicionActivada);
 
         buscarCoord.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -129,8 +144,6 @@ public class NuevoReclamoFragment extends Fragment {
                         sacarFoto();
                     }
                 }
-
-
             }
         });
 
@@ -140,7 +153,110 @@ public class NuevoReclamoFragment extends Fragment {
                 saveOrUpdateReclamo();
             }
         });
+
+        btnGrabar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    if (ContextCompat.checkSelfPermission(getActivity(),
+                            Manifest.permission.RECORD_AUDIO)
+                            != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.RECORD_AUDIO}, 2);
+
+                    } else {
+                        grabarAudio();
+                    }
+                }
+            }
+        });
+
+        btnDetener.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mRecorder.stop();
+                mRecorder.release();
+                mRecorder = null;
+                btnGrabar.setEnabled(true);
+                btnReproducir.setEnabled(true);
+                btnDetener.setEnabled(false);
+                btnGuardar.setEnabled(true);
+                buscarCoord.setEnabled(true);
+            }
+        });
+
+        btnReproducir.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                btnGrabar.setEnabled(false);
+                btnReproducir.setEnabled(true);
+                btnDetener.setEnabled(false);
+                btnGuardar.setEnabled(false);
+                buscarCoord.setEnabled(false);
+                if(!reproduciendo){
+                    reproduciendo = true;
+                    mPlayer = new MediaPlayer();
+                    try {
+                        mPlayer.setDataSource(reclamoActual.getPathAudio());
+                        mPlayer.prepare();
+                        mPlayer.start();
+                        mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                            @Override
+                            public void onCompletion(MediaPlayer mp) {
+                                mPlayer.release();
+                                mPlayer = null;
+                                reproduciendo = false;
+                                btnReproducir.setText("REPRODUCIR");
+                                btnGrabar.setEnabled(true);
+                                btnReproducir.setEnabled(true);
+                                btnDetener.setEnabled(false);
+                                btnGuardar.setEnabled(true);
+                                buscarCoord.setEnabled(true);
+                            }
+                        });
+                    } catch (IOException e) {
+                        Log.e("AudioRecordTest", "prepare() failed");
+                    }
+                    btnReproducir.setText("STOP");
+
+                }else{
+                    mPlayer.release();
+                    mPlayer = null;
+                    reproduciendo = false;
+                    btnReproducir.setText("REPRODUCIR");
+                    btnGrabar.setEnabled(true);
+                    btnReproducir.setEnabled(true);
+                    btnDetener.setEnabled(false);
+                    btnGuardar.setEnabled(true);
+                    buscarCoord.setEnabled(true);
+                }
+            }
+        });
+
         return v;
+    }
+
+    public void grabarAudio() {
+        btnGrabar.setEnabled(false);
+        btnReproducir.setEnabled(false);
+        btnDetener.setEnabled(true);
+        btnGuardar.setEnabled(false);
+        buscarCoord.setEnabled(false);
+        mRecorder = new MediaRecorder();
+        mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        try {
+            createAudioFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        mRecorder.setOutputFile(reclamoActual.getPathAudio());
+        mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+        try {
+            mRecorder.prepare();
+        } catch (IOException e) {
+            Log.e("AudioRecordTest", "prepare() failed");
+        }
+        mRecorder.start();
     }
 
     public void sacarFoto() {
@@ -176,16 +292,34 @@ public class NuevoReclamoFragment extends Fragment {
         return image;
     }
 
+    private File createAudioFile() throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss")
+                .format(new Date());
+        String audioFileName = "3GP_" + timeStamp + "_";
+        File dir = getActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File audio = File.createTempFile(
+                audioFileName, /* prefix */
+                ".3gp", /* suffix */
+                dir /* directory */
+        );
+        reclamoActual.setPathAudio(audio.getAbsolutePath());
+        return audio;
+    }
+
     private void cargarReclamo(final int id) {
         if (id > 0) {
             Runnable hiloCargaDatos = new Runnable() {
                 @Override
                 public void run() {
                     reclamoActual = reclamoDao.getById(id);
+
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            onActivityResult(REQUEST_IMAGE_SAVE,Activity.RESULT_OK,null);
+                            if(reclamoActual.getPathFoto()!=null) onActivityResult(REQUEST_IMAGE_SAVE, Activity.RESULT_OK, null);
+                            if(reclamoActual.getPathAudio()!=null) btnReproducir.setEnabled(true);
+                            pathFotoVieja=reclamoActual.getPathFoto();
+                            pathAudioViejo=reclamoActual.getPathAudio();
                             mail.setText(reclamoActual.getEmail());
                             tvCoord.setText(reclamoActual.getLatitud() + ";" + reclamoActual.getLongitud());
                             reclamoDesc.setText(reclamoActual.getReclamo());
@@ -223,7 +357,18 @@ public class NuevoReclamoFragment extends Fragment {
         Runnable hiloActualizacion = new Runnable() {
             @Override
             public void run() {
-
+                if(pathFotoVieja!=reclamoActual.getPathFoto() && pathFotoVieja!=null)
+                {
+                    File file = new File(pathFotoVieja);
+                    if(file.delete()) System.out.println("Foto borrada");
+                    else System.out.println("No se pudo borrar la foto");
+                }
+                if(pathAudioViejo!=reclamoActual.getPathAudio() && pathAudioViejo!=null)
+                {
+                    File file = new File(pathAudioViejo);
+                    if(file.delete()) System.out.println("Audio borrado");
+                    else System.out.println("No se pudo borrar el audio");
+                }
                 if (reclamoActual.getId() > 0) reclamoDao.update(reclamoActual);
                 else reclamoDao.insert(reclamoActual);
                 getActivity().runOnUiThread(new Runnable() {
@@ -254,12 +399,16 @@ public class NuevoReclamoFragment extends Fragment {
             ivFoto.setImageBitmap(imageBitmap);
         }
         if (requestCode == REQUEST_IMAGE_SAVE && resultCode == Activity.RESULT_OK) {
-            File file = new File(reclamoActual.getPathFoto());
+
+
             Bitmap imageBitmap = null;
             try {
+                File file = new File(reclamoActual.getPathFoto());
                 imageBitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), Uri.fromFile(file));
             } catch (IOException e) {
                 e.printStackTrace();
+            } catch (NullPointerException n){
+                n.printStackTrace();
             }
             if (imageBitmap != null) {
                 ivFoto.setImageBitmap(imageBitmap);

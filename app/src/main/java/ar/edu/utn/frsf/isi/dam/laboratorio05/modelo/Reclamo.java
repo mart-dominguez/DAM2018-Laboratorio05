@@ -16,10 +16,17 @@ public class Reclamo {
     private Double longitud;
     private String reclamo;
     private String email;
-    private String pathFoto;
+    private String pathFoto,pathAudio;
     @TypeConverters(TipoReclamoConverter.class)
     private TipoReclamo tipo;
 
+    public String getPathAudio() {
+        return pathAudio;
+    }
+
+    public void setPathAudio(String pathAudio) {
+        this.pathAudio = pathAudio;
+    }
 
     public String getPathFoto() {return pathFoto;}
 

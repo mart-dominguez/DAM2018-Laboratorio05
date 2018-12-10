@@ -105,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
                             getSupportFragmentManager()
                                     .beginTransaction()
                                     .replace(R.id.contenido, fragment,tag)
-                                    .addToBackStack(null)
+                                    .addToBackStack(tag)
                                     .commit();
 
                             menuItem.setChecked(true);
@@ -154,7 +154,7 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
             getSupportFragmentManager()
                     .beginTransaction()
                     .replace(R.id.contenido, fragment, tag)
-                    .addToBackStack(null)
+                    .addToBackStack(tag)
                     .commit();
             ((MapaFragment)fragment).setListener(MainActivity.this);
             // para que el usuario vea el mapa y con el click largo pueda acceder
@@ -164,22 +164,28 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 
         @Override
         public void coordenadasSeleccionadas(LatLng c) {
+            boolean esNuevo=false;
             String tag = "nuevoReclamoFragment";
             Fragment fragment =  getSupportFragmentManager().findFragmentByTag(tag);
             if(fragment==null) {
                 fragment = new NuevoReclamoFragment();
                 ((NuevoReclamoFragment) fragment).setListener(MainActivity.this);
+                esNuevo=true;
+                System.out.println("Es nuevo qliau");
             }
-            Bundle bundle = new Bundle();
+            Bundle bundle = fragment.getArguments();
+            if(bundle == null) bundle = new Bundle();
             DecimalFormat numberFormat = new DecimalFormat("#.000");
             bundle.putString("latLng",numberFormat.format(c.latitude)+";"+numberFormat.format(c.longitude));
             fragment.setArguments(bundle);
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.contenido, fragment,tag)
-                    .addToBackStack(null)
-                    .commit();
-
+            if(esNuevo) {
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.contenido, fragment, tag)
+                        .addToBackStack(tag)
+                        .commit();
+            }
+            else getSupportFragmentManager().popBackStack();
         }
 
         public void mapaPorTipos(int pos){
@@ -197,9 +203,35 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
                 getSupportFragmentManager()
                         .beginTransaction()
                         .replace(R.id.contenido, fragment,tag)
-                        .addToBackStack(null)
+                        .addToBackStack(tag)
                         .commit();
                 getSupportActionBar().setTitle("Mapa por tipos");
+    }
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        System.out.println("rq :" + requestCode);
+        switch (requestCode) {
+            case 1:
+                System.out.println("ENTREEEEEEEEEEEEEEE");
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    String tag = "nuevoReclamoFragment";
+                    NuevoReclamoFragment f =  (NuevoReclamoFragment)getSupportFragmentManager().findFragmentByTag(tag);
+                    f.sacarFoto();
+                }
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+
+        int count = getSupportFragmentManager().getBackStackEntryCount();
+
+        if (count == 0) {
+            super.onBackPressed();
+            //additional code
+        } else {
+            getSupportFragmentManager().popBackStack();
+        }
+
     }
 
 }

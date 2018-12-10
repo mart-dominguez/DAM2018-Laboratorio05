@@ -54,9 +54,11 @@ public class ListaReclamosFragment extends Fragment {
             Bundle args = new Bundle();
             args.putInt("idReclamo",id);
             f.setArguments(args);
+            String tag="nuevoReclamoFragment";
             getActivity().getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.contenido, f)
+                    .replace(R.id.contenido, f,tag)
+                    .addToBackStack(tag)
                     .commit();
         }
 

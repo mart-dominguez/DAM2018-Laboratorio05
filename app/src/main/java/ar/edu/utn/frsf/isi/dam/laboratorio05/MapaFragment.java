@@ -19,6 +19,7 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.maps.android.heatmaps.Gradient;
@@ -61,7 +62,7 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
         }
         miMapa.setMyLocationEnabled(true);
-        switch(getArguments().getInt("tipo_mapa")){
+        switch (getArguments().getInt("tipo_mapa")) {
             case 2:
                 setearMarcadores();
                 break;
@@ -70,7 +71,7 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
                 break;
             case 4:
                 ArrayList<LatLng> list = new ArrayList<>();
-                for(Reclamo r: listaReclamos){
+                for (Reclamo r : listaReclamos) {
                     list.add(new LatLng(r.getLatitud(), r.getLongitud()));
                 }
                 HeatmapTileProvider mProvider = new HeatmapTileProvider.Builder().data(list)
@@ -78,12 +79,29 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
                         .build();
                 miMapa.addTileOverlay(new TileOverlayOptions().tileProvider(mProvider));
                 break;
+            case 5: {
+                setearMarcadores();
+                dibujarLineas();
+                break;
+            }
         }
         return;
     }
 
+    private void dibujarLineas() {
+        ArrayList<LatLng> listaPos = new ArrayList<>();
+        for (Reclamo r : listaReclamos) {
+            listaPos.add(new LatLng(r.getLatitud(), r.getLongitud()));
+        }
+        miMapa.addPolyline(new PolylineOptions()
+                .addAll(listaPos)
+                .width(4)
+                .color(Color.RED)
+        );
+    }
+
     private void dibujarIndividual() {
-        if(reclamoId != null){
+        if (reclamoId != null) {
             LatLng pos = new LatLng(reclamoId.getLatitud(), reclamoId.getLongitud());
             miMapa.addMarker(new MarkerOptions()
                     .position(pos)
@@ -135,6 +153,9 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
             case 4:
                 listarReclamos();
                 break;
+            case 5:
+                buscarPorTipo((String) getArguments().get("tipo_reclamo"));
+                break;
         }
         return rootView;
     }
@@ -173,6 +194,21 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
             builder.include(new LatLng(r.getLatitud(), r.getLongitud()));
         }
         return builder.build();
+    }
+
+
+
+    private void buscarPorTipo(String tipoReclamo) {
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                if (tipoReclamo == null) return;
+                listaReclamos = (ArrayList<Reclamo>) reclamoDao.getByTipo(tipoReclamo);
+                if (listaReclamos.isEmpty()) return;
+            }
+        };
+        Thread t = new Thread(r);
+        t.start();
     }
 }
 

@@ -12,11 +12,36 @@ import android.view.ViewGroup;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
 
 public class MapaFragment extends SupportMapFragment implements OnMapReadyCallback {
     private GoogleMap miMapa;
+    private MainActivity listener;
 
     public MapaFragment() {
+    }
+
+    public void setListener(MainActivity listener) {
+        this.listener = listener;
+    }
+
+    @Override
+    public void onMapReady(GoogleMap map) {
+
+        miMapa = map;
+        miMapa.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+            @Override
+            public void onMapLongClick(LatLng latLng) {
+                listener.coordenadasSeleccionadas(latLng);
+            }
+        });
+        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(getActivity(),
+                    new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 0);
+            ActivityCompat.requestPermissions(getActivity(),
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
+        }
+        miMapa.setMyLocationEnabled(true);
     }
 
     @Override
@@ -34,17 +59,8 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
         return rootView;
     }
 
-    @Override
-    public void onMapReady(GoogleMap map) {
-
-        miMapa = map;
-        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(getActivity(),
-                    new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 0);
-            ActivityCompat.requestPermissions(getActivity(),
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
-        }
-        miMapa.setMyLocationEnabled(true);
+    public interface OnMapaListener {
+        void coordenadasSeleccionadas(LatLng c);
     }
 }
 

@@ -44,4 +44,6 @@ dependencies {
     testImplementation "android.arch.persistence.room:testing:$room_version"
 
     implementation 'com.google.android.gms:play-services-maps:16.0.0'
+
+    api 'com.google.maps.android:android-maps-utils:0.4+'
 }

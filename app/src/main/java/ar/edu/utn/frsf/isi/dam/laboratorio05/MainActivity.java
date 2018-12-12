@@ -11,9 +11,6 @@ import android.view.MenuItem;
 import com.google.android.gms.maps.model.LatLng;
 
 
-// AGREGAR en MapaFragment una interface MapaFragment.OnMapaListener con el método coordenadasSeleccionadas 
-// IMPLEMENTAR dicho método en esta actividad.
-
 public class MainActivity extends AppCompatActivity implements FragmentManager.OnBackStackChangedListener,
         NuevoReclamoFragment.OnNuevoLugarListener, MapaFragment.OnMapaListener {
     private DrawerLayout drawerLayout;
@@ -82,6 +79,14 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
                                 ((MapaFragment) fragment).setListener(MainActivity.this);
                                 fragmentTransaction = true;
                                 break;
+                            case R.id.formBusqueda:
+                                tag = "formBusqueda";
+                                fragment = getSupportFragmentManager().findFragmentByTag(tag);
+                                if (fragment == null) {
+                                    fragment = new FormBusqueda();
+                                }
+                                fragmentTransaction = true;
+                                break;
                         }
                         if(fragmentTransaction) {
                             getSupportFragmentManager()
@@ -117,12 +122,6 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
         boolean canback = getSupportFragmentManager().getBackStackEntryCount()>0;
         getSupportActionBar().setDisplayHomeAsUpEnabled(canback);
     }
-
-    // AGREGAR en MapaFragment una interface OnMapaListener con el método coordenadasSeleccionadas
-    // IMPLEMENTAR dic ho método en esta actividad.
-    // el objetivo de este método, es simplmente invocar al fragmento "nuevoReclamoFragment"
-    // pasando como argumento el objeto "LatLng" elegido por el usuario en el click largo
-    // como ubicación del reclamo
 
     @Override
     public void coordenadasSeleccionadas(LatLng c) {

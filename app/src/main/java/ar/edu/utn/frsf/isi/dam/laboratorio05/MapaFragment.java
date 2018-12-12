@@ -3,6 +3,7 @@ package ar.edu.utn.frsf.isi.dam.laboratorio05;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.view.LayoutInflater;
@@ -14,6 +15,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -29,6 +32,7 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
     private MainActivity listener;
     private ArrayList<Reclamo> listaReclamos = new ArrayList<>();
     private ReclamoDao reclamoDao;
+    private Reclamo reclamoId;
 
     public MapaFragment() {
     }
@@ -54,7 +58,32 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
         }
         miMapa.setMyLocationEnabled(true);
-        setearMarcadores();
+        switch(getArguments().getInt("tipo_mapa")){
+            case 2:
+                setearMarcadores();
+                break;
+            case 3:
+                dibujarIndividual();
+                break;
+        }
+        return;
+    }
+
+    private void dibujarIndividual() {
+        if(reclamoId != null){
+            LatLng pos = new LatLng(reclamoId.getLatitud(), reclamoId.getLongitud());
+            miMapa.addMarker(new MarkerOptions()
+                    .position(pos)
+                    .title(reclamoId.getReclamo()));
+            miMapa.addCircle(new CircleOptions()
+                    .center(pos)
+                    .radius(500)
+                    .strokeColor(Color.RED)
+                    .fillColor(0x22ff000d)
+                    .strokeWidth(5));
+            miMapa.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, 15));
+        }
+        return;
     }
 
     private void setearMarcadores() {
@@ -87,8 +116,23 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
             case 2:
                 listarReclamos();
                 break;
+            case 3:
+                buscarPorId(getArguments().getInt("idReclamo"));
+                break;
         }
         return rootView;
+    }
+
+    private void buscarPorId(int idReclamo) {
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                reclamoId = reclamoDao.getById(idReclamo);
+                if (reclamoId == null) return;
+            }
+        };
+        Thread t = new Thread(r);
+        t.start();
     }
 
     private void listarReclamos() {

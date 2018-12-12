@@ -54,6 +54,10 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
         }
         miMapa.setMyLocationEnabled(true);
+        setearMarcadores();
+    }
+
+    private void setearMarcadores() {
         if (!listaReclamos.isEmpty()) {
             for (Reclamo r : listaReclamos) {
                 miMapa.addMarker(new MarkerOptions()
@@ -65,7 +69,6 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
             CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
             miMapa.animateCamera(cu);
         }
-
     }
 
     @Override
@@ -82,18 +85,22 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
         reclamoDao = MyDatabase.getInstance(this.getActivity()).getReclamoDao();
         switch (tipoMapa) {
             case 2:
-                Runnable hiloCargarReclamos = new Runnable() {
-                    @Override
-                    public void run() {
-                        listaReclamos.clear();
-                        listaReclamos.addAll(reclamoDao.getAll());
-                    }
-                };
-                Thread t1 = new Thread(hiloCargarReclamos);
-                t1.start();
+                listarReclamos();
                 break;
         }
         return rootView;
+    }
+
+    private void listarReclamos() {
+        Runnable hiloCargarReclamos = new Runnable() {
+            @Override
+            public void run() {
+                listaReclamos.clear();
+                listaReclamos.addAll(reclamoDao.getAll());
+            }
+        };
+        Thread t1 = new Thread(hiloCargarReclamos);
+        t1.start();
     }
 
     public interface OnMapaListener {

@@ -2,8 +2,6 @@ package ar.edu.utn.frsf.isi.dam.laboratorio05;
 
 
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,17 +18,8 @@ import ar.edu.utn.frsf.isi.dam.laboratorio05.modelo.ReclamoDao;
 
 public class NuevoReclamoFragment extends Fragment {
 
-    public interface OnNuevoLugarListener {
-        public void obtenerCoordenadas();
-    }
-
-    public void setListener(OnNuevoLugarListener listener) {
-        this.listener = listener;
-    }
-
     private Reclamo reclamoActual;
     private ReclamoDao reclamoDao;
-
     private EditText reclamoDesc;
     private EditText mail;
     private Spinner tipoReclamo;
@@ -38,12 +27,10 @@ public class NuevoReclamoFragment extends Fragment {
     private Button buscarCoord;
     private Button btnGuardar;
     private OnNuevoLugarListener listener;
-
     private ArrayAdapter<Reclamo.TipoReclamo> tipoReclamoAdapter;
     public NuevoReclamoFragment() {
         // Required empty public constructor
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -52,12 +39,12 @@ public class NuevoReclamoFragment extends Fragment {
 
         View v = inflater.inflate(R.layout.fragment_nuevo_reclamo, container, false);
 
-        reclamoDesc = (EditText) v.findViewById(R.id.reclamo_desc);
-        mail= (EditText) v.findViewById(R.id.reclamo_mail);
-        tipoReclamo= (Spinner) v.findViewById(R.id.reclamo_tipo);
-        tvCoord= (TextView) v.findViewById(R.id.reclamo_coord);
-        buscarCoord= (Button) v.findViewById(R.id.btnBuscarCoordenadas);
-        btnGuardar= (Button) v.findViewById(R.id.btnGuardar);
+        reclamoDesc = v.findViewById(R.id.reclamo_desc);
+        mail = v.findViewById(R.id.reclamo_mail);
+        tipoReclamo = v.findViewById(R.id.reclamo_tipo);
+        tvCoord = v.findViewById(R.id.reclamo_coord);
+        buscarCoord = v.findViewById(R.id.btnBuscarCoordenadas);
+        btnGuardar = v.findViewById(R.id.btnGuardar);
 
         tipoReclamoAdapter = new ArrayAdapter<Reclamo.TipoReclamo>(getActivity(),android.R.layout.simple_spinner_item,Reclamo.TipoReclamo.values());
         tipoReclamoAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -92,6 +79,15 @@ public class NuevoReclamoFragment extends Fragment {
             }
         });
         return v;
+    }
+
+    public void setListener(OnNuevoLugarListener listener) {
+        this.listener = listener;
+    }
+
+
+    public interface OnNuevoLugarListener {
+        void obtenerCoordenadas();
     }
 
     private void cargarReclamo(final int id){

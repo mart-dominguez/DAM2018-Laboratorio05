@@ -15,11 +15,14 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.TileOverlay;
+import com.google.android.gms.maps.model.TileOverlayOptions;
+import com.google.maps.android.heatmaps.Gradient;
+import com.google.maps.android.heatmaps.HeatmapTileProvider;
 
 import java.util.ArrayList;
 
@@ -64,6 +67,16 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
                 break;
             case 3:
                 dibujarIndividual();
+                break;
+            case 4:
+                ArrayList<LatLng> list = new ArrayList<>();
+                for(Reclamo r: listaReclamos){
+                    list.add(new LatLng(r.getLatitud(), r.getLongitud()));
+                }
+                HeatmapTileProvider mProvider = new HeatmapTileProvider.Builder().data(list)
+                        .radius(49)
+                        .build();
+                miMapa.addTileOverlay(new TileOverlayOptions().tileProvider(mProvider));
                 break;
         }
         return;
@@ -118,6 +131,9 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
                 break;
             case 3:
                 buscarPorId(getArguments().getInt("idReclamo"));
+                break;
+            case 4:
+                listarReclamos();
                 break;
         }
         return rootView;

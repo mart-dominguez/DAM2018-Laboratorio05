@@ -1,20 +1,38 @@
 package ar.edu.utn.frsf.isi.dam.laboratorio05;
 
 
+import android.app.Activity;
+import android.content.ContentResolver;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.FileProvider;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import ar.edu.utn.frsf.isi.dam.laboratorio05.modelo.MyDatabase;
 import ar.edu.utn.frsf.isi.dam.laboratorio05.modelo.Reclamo;
 import ar.edu.utn.frsf.isi.dam.laboratorio05.modelo.ReclamoDao;
+
+import static android.app.Activity.RESULT_OK;
 
 public class NuevoReclamoFragment extends Fragment {
 
@@ -28,6 +46,12 @@ public class NuevoReclamoFragment extends Fragment {
     private Button btnGuardar;
     private OnNuevoLugarListener listener;
     private ArrayAdapter<Reclamo.TipoReclamo> tipoReclamoAdapter;
+
+
+    private String direccionDeFoto;
+    private ImageView imageView;
+    private Button btnTomarFoto;
+
     public NuevoReclamoFragment() {
         // Required empty public constructor
     }
@@ -45,6 +69,11 @@ public class NuevoReclamoFragment extends Fragment {
         tvCoord = v.findViewById(R.id.reclamo_coord);
         buscarCoord = v.findViewById(R.id.btnBuscarCoordenadas);
         btnGuardar = v.findViewById(R.id.btnGuardar);
+        btnTomarFoto = v.findViewById(R.id.btnTomarFoto);
+        imageView = v.findViewById(R.id.imageView);
+
+        btnTomarFoto.setVisibility(View.VISIBLE);
+        imageView.setVisibility(View.GONE);
 
         tipoReclamoAdapter = new ArrayAdapter<Reclamo.TipoReclamo>(getActivity(),android.R.layout.simple_spinner_item,Reclamo.TipoReclamo.values());
         tipoReclamoAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -78,6 +107,18 @@ public class NuevoReclamoFragment extends Fragment {
                 saveOrUpdateReclamo();
             }
         });
+
+        btnTomarFoto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    sacarGuardarFoto();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
         return v;
     }
 
@@ -109,6 +150,10 @@ public class NuevoReclamoFragment extends Fragment {
                                     break;
                                 }
                             }
+                            if (!reclamoActual.getDireccionDeFoto().isEmpty() && reclamoActual.getDireccionDeFoto() != null) {
+                                direccionDeFoto = reclamoActual.getDireccionDeFoto();
+                                cargarFoto(reclamoActual.getDireccionDeFoto());
+                            }
                         }
                     });
                 }
@@ -127,6 +172,7 @@ public class NuevoReclamoFragment extends Fragment {
     private void saveOrUpdateReclamo(){
         reclamoActual.setEmail(mail.getText().toString());
         reclamoActual.setReclamo(reclamoDesc.getText().toString());
+        reclamoActual.setDireccionDeFoto(direccionDeFoto);
         reclamoActual.setTipo(tipoReclamoAdapter.getItem(tipoReclamo.getSelectedItemPosition()));
         if(tvCoord.getText().toString().length()>0 && tvCoord.getText().toString().contains(";")) {
             String[] coordenadas = tvCoord.getText().toString().split(";");
@@ -146,6 +192,11 @@ public class NuevoReclamoFragment extends Fragment {
                         mail.setText(R.string.texto_vacio);
                         tvCoord.setText(R.string.texto_vacio);
                         reclamoDesc.setText(R.string.texto_vacio);
+                        btnTomarFoto.setVisibility(View.VISIBLE);
+                        imageView.setVisibility(View.GONE);
+                        direccionDeFoto=null;
+                        imageView=null;
+                        btnTomarFoto=null;
                         getActivity().getFragmentManager().popBackStack();
                     }
                 });
@@ -155,5 +206,59 @@ public class NuevoReclamoFragment extends Fragment {
         t1.start();
     }
 
+
+    private File createImageFile() throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss")
+                .format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File dir = getActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName, /* prefix */
+                ".jpg", /* suffix */
+                dir /* directory */
+        );
+        direccionDeFoto = image.getAbsolutePath();
+        return image;
+    }
+
+    private void sacarGuardarFoto() throws IOException {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+            File photoFile = null;
+            photoFile = createImageFile();
+            if (photoFile != null) {
+                Uri photoURI = FileProvider.getUriForFile(this.getActivity(),
+                        "com.example.android.fileprovider",
+                        photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                startActivityForResult(takePictureIntent, 100);
+            }
+        }
+    }
+
+    @Override
+    public void onActivityResult(int reqCode, int resCode, Intent data) {
+        if (reqCode == 100 && resCode == RESULT_OK) {
+            cargarFoto(direccionDeFoto);
+        }
+    }
+
+    public void cargarFoto(String directorio) {
+        File file = new File(directorio);
+        Bitmap imageBitmap = null;
+        try {
+            imageBitmap = MediaStore.Images.Media
+                    .getBitmap(getActivity().getContentResolver(),
+                            Uri.fromFile(file));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (imageBitmap != null) {
+
+            imageView.setImageBitmap(imageBitmap);
+            btnTomarFoto.setVisibility(View.GONE);
+            imageView.setVisibility(View.VISIBLE);
+        }
+    }
 
 }

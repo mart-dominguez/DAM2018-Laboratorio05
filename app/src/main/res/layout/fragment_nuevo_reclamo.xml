@@ -62,6 +62,20 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
+
+    <Button
+        android:id="@+id/btnGrabarAudio"
+        android:text="Grabar audio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/btnReproducir"
+        android:text="Reproducir audio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+
     <Button
         android:id="@+id/btnGuardar"
         android:text="Guardar"

@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -21,6 +22,37 @@ import com.google.android.gms.maps.SupportMapFragment;
 public class MapaFragment extends SupportMapFragment implements OnMapReadyCallback {
     private GoogleMap miMapa;
     private int tipoMapa;
+    private boolean FLAG_NUEVO_LUGAR;
+
+
+    /************** OnMapaListener *********************/
+    private OnMapaListener listener;
+
+    public interface OnMapaListener {
+        public void coordenadasSeleccionadas(LatLng c);
+    }
+
+    public OnMapaListener getListener() {
+        return listener;
+    }
+
+    public void setListener(OnMapaListener listener) {
+        this.listener = listener;
+    }
+
+    /************** OnMapaListener *********************/
+
+
+    private GoogleMap.OnMapLongClickListener listenerClickLargo = new GoogleMap.OnMapLongClickListener() {
+        @Override
+        public void onMapLongClick(LatLng latLng) {
+            if(FLAG_NUEVO_LUGAR){
+                listener.coordenadasSeleccionadas(latLng);
+                FLAG_NUEVO_LUGAR = false;
+            }
+        }
+    };
+
 
     public MapaFragment() {
         // Required empty public constructor
@@ -36,6 +68,10 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
         if (argumentos != null) {
             tipoMapa = argumentos.getInt("tipo_mapa", 0);
         }
+
+
+
+        FLAG_NUEVO_LUGAR = false;
         getMapAsync(this);
         return rootView;
     }
@@ -56,7 +92,26 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
                     9999);
             return;
         }
-        miMapa.setMyLocationEnabled(true);
+
+        switch(tipoMapa) {
+            case 0:
+                miMapa.setMyLocationEnabled(true);
+                break;
+            case 1:
+                miMapa.setOnMapLongClickListener(listenerClickLargo);
+
+                break;
+
+        }
+
     }
+
+
+
+    public void configurarNuevoLugar(){
+        FLAG_NUEVO_LUGAR = true;
+    }
+
+
 
 }

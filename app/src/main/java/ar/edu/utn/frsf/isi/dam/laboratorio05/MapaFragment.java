@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -22,7 +23,7 @@ import com.google.android.gms.maps.model.LatLng;
 public class MapaFragment extends SupportMapFragment implements OnMapReadyCallback {
     private GoogleMap miMapa;
     private int tipoMapa;
-    private boolean FLAG_NUEVO_LUGAR;
+
 
 
     /************** OnMapaListener *********************/
@@ -46,12 +47,15 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
     private GoogleMap.OnMapLongClickListener listenerClickLargo = new GoogleMap.OnMapLongClickListener() {
         @Override
         public void onMapLongClick(LatLng latLng) {
-            if(FLAG_NUEVO_LUGAR){
+            System.out.println("#################Click Largo###############");
+
                 listener.coordenadasSeleccionadas(latLng);
-                FLAG_NUEVO_LUGAR = false;
-            }
+
+
         }
     };
+
+
 
 
     public MapaFragment() {
@@ -71,7 +75,7 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
 
 
 
-        FLAG_NUEVO_LUGAR = false;
+
         getMapAsync(this);
         return rootView;
     }
@@ -104,12 +108,6 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
 
         }
 
-    }
-
-
-
-    public void configurarNuevoLugar(){
-        FLAG_NUEVO_LUGAR = true;
     }
 
 

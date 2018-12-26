@@ -167,7 +167,7 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
             String tag = "";
             tag="mapaReclamos";
             fragment =  getSupportFragmentManager().findFragmentByTag(tag);
-            
+
             if(fragment==null) {
                 fragment = new MapaFragment();
                 // configurar a la actividad como listener de los eventos del mapa ((MapaFragment) fragment).setListener(this);
@@ -176,6 +176,7 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
             Bundle args = new Bundle();
             args.putInt("tipo_mapa",1);
             fragment.setArguments(args);
+
 
             getSupportFragmentManager()
                     .beginTransaction()

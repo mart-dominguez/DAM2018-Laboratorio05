@@ -12,10 +12,24 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import ar.edu.utn.frsf.isi.dam.laboratorio05.modelo.AppDatabase;
+import ar.edu.utn.frsf.isi.dam.laboratorio05.modelo.MyDatabase;
+import ar.edu.utn.frsf.isi.dam.laboratorio05.modelo.Reclamo;
+import ar.edu.utn.frsf.isi.dam.laboratorio05.modelo.ReclamoDao;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -23,6 +37,11 @@ import com.google.android.gms.maps.model.LatLng;
 public class MapaFragment extends SupportMapFragment implements OnMapReadyCallback {
     private GoogleMap miMapa;
     private int tipoMapa;
+    private ReclamoDao reclamoDao;
+    private List<Reclamo> listaReclamos;
+    private LatLngBounds.Builder builder;
+    private CameraUpdate cu;
+
 
 
 
@@ -65,9 +84,14 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
 
     public View onCreateView(LayoutInflater inflater, ViewGroup
             container, Bundle savedInstanceState) {
+        reclamoDao = MyDatabase.getInstance(this.getActivity()).getReclamoDao();
+        builder = new LatLngBounds.Builder();
+
         View rootView = super.onCreateView(inflater, container,
                 savedInstanceState);
         tipoMapa = 0;
+
+
         Bundle argumentos = getArguments();
         if (argumentos != null) {
             tipoMapa = argumentos.getInt("tipo_mapa", 0);
@@ -103,6 +127,49 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
                 break;
             case 1:
                 miMapa.setOnMapLongClickListener(listenerClickLargo);
+                break;
+            case 2:
+                Runnable hiloCargaDatos = new Runnable() {
+                    @Override
+                    public void run() {
+                        listaReclamos = reclamoDao.getAll();
+
+
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                for (Reclamo unReclamo : listaReclamos){
+                                    LatLng posicion = new LatLng(unReclamo.getLatitud(),unReclamo.getLongitud());
+                                    miMapa.addMarker(new MarkerOptions().position(posicion)
+                                            .title(String.valueOf(unReclamo.getId()))
+                                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));
+
+                                    builder.include(posicion);
+
+                                }
+
+                                int padding = 50;
+                                LatLngBounds bounds = builder.build();
+                                cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
+                                miMapa.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
+                                    @Override
+                                    public void onMapLoaded() {
+                                        miMapa.animateCamera(cu);
+                                    }
+                                });
+
+                            }
+                        });
+
+                    }
+                };
+
+                Thread t1 = new Thread(hiloCargaDatos);
+                t1.start();
+
+
+
+
 
                 break;
 

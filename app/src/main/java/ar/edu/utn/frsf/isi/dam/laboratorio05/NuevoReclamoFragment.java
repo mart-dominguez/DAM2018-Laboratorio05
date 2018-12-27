@@ -20,13 +20,7 @@ import ar.edu.utn.frsf.isi.dam.laboratorio05.modelo.ReclamoDao;
 
 public class NuevoReclamoFragment extends Fragment {
 
-    public interface OnNuevoLugarListener {
-        public void obtenerCoordenadas();
-    }
 
-    public void setListener(OnNuevoLugarListener listener) {
-        this.listener = listener;
-    }
 
     private Reclamo reclamoActual;
     private ReclamoDao reclamoDao;
@@ -37,7 +31,29 @@ public class NuevoReclamoFragment extends Fragment {
     private TextView tvCoord;
     private Button buscarCoord;
     private Button btnGuardar;
+
+
+    /************** OnNuevoLugarListener *********************/
     private OnNuevoLugarListener listener;
+
+    public interface OnNuevoLugarListener {
+        public void obtenerCoordenadas();
+    }
+
+    public OnNuevoLugarListener getListener() {
+        return listener;
+    }
+
+    public void setListener(OnNuevoLugarListener listener) {
+        this.listener = listener;
+    }
+
+
+    /************** OnNuevoLugarListener *********************/
+
+
+
+
 
     private ArrayAdapter<Reclamo.TipoReclamo> tipoReclamoAdapter;
     public NuevoReclamoFragment() {
